@@ -1,0 +1,200 @@
+\documentclass{article}
+
+\usepackage[czech]{babel}
+\usepackage[margin=1in]{geometry} 
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{slashbox}
+
+\urlstyle{same}
+
+
+\title{Zápočtová úloha č.2}
+
+\author{Nail Sultanbekov}
+\date{\today}
+
+\begin{document}
+\maketitle
+\begin{abstract} 
+    Cílem tohoto protokolu je pochopit a implementovat metodu konečných diferencí pro řešení Poissonovy rovnice. 
+    Budeme tady použivat Jacobiho a Gauss-Seidelovu iterační metody pro řešení lineárních soustav a srovnávat 
+    jejich chyby v případě Poissonovy rovnici.
+\end{abstract}
+\section*{Numerické metody}
+\subsection*{Kratký popis metody konečných diferencí}
+Metoda konečných diferencí je numerická metoda používaná pro aproximaci řešení 
+parciálních diferenciálních rovnic. Je založena na diskretizaci oblasti do sítě 
+bodů a nahrazení derivací v diferenciální rovnici aproximacemi konečných rozdílů.
+
+Definujme následující diferenciální rovnicí:
+
+\begin{equation*}
+\frac{d^2 u}{d x^2}= f(x)
+\end{equation*}
+
+kde $u(x)$ je neznámá funkce a $f(x)$ je daná pravá strana. 
+Cílem je nalézt řešení $u(x)$, které tuto rovnici splňuje.
+
+Pro aplikaci metody konečných diferencí diskrétizujeme oblast do mřížky s body $x_i$, 
+kde $i = 0, 1, ..., M$.
+Nechť $h$ jsou mezikrokové vzdálenosti.
+
+Druhou derivace můžeme aproximovat pomocí centrální diferencí:
+
+\begin{align*}
+\frac{d^2 u}{d x^2} \approx \frac{u_{i+1} - 2u_i + u_{i-1}}{h^2} \\
+\end{align*}
+
+Dosazením těchto aproximací do původní PDR získáme systém algebraických rovnic, 
+které obsahují neznámé hodnoty $u$ v každém bodě mřížky. 
+Tento systém lze pak řešit pomocí iterativních metod nebo přímých solverů.
+
+Přesnost metody konečných diferencí závisí na volbě mezikrokových vzdáleností $h$.
+S klesajícími mezikrokovými vzdálenostmi se aproximace stává přesnější, 
+ale za cenu zvýšené výpočetní náročnosti.
+
+\subsection*{Úvod do metod Jacobiho a Gauss-Seidela}
+
+\paragraph*{} Metody Jacobiho a Gauss-Seidela jsou iterativní numerické metody používané 
+k řešení soustav lineárních rovnic $Ax = b$.
+
+\subsubsection*{Jakobího metoda}
+
+\paragraph*{}Metoda Jacobiho je založena na iterativním přístupu, 
+při kterém se v každém kroku aktualizují hodnoty neznámých proměnných založené pouze na 
+jejich předchozích hodnotách. Konkrétně se jedná o následující krok:
+
+\begin{equation*}
+    x_{k+1} = D^{-1} \left(b - (L+U) x_k\right),
+\end{equation*}
+kde $A = D + L + U$, $D$ je diagonální matice, $L$ je dolní trojúhelníková a $U$ je horní trojúhelníková matice.
+
+\subsubsection*{Gauss-Seidlová metoda}
+\paragraph*{} Gauss-Seidlová metoda je podobná Jakobího, avšak v každém kroku hodnoty $x_{k+1}$ se aktualizují trochu jinak:
+\begin{equation*}
+    x_{k+1} = L^{-1}\left(b - Ux_k\right)
+\end{equation*}
+
+\section*{Srovnání metod}
+
+\paragraph*{}V této sekci prezentuji výsledky experimentů, které jsem provedl za učelem porovnání a analyzy chyb a konvergence 
+metod používaných k řešení lineárních rovnic. Pro každou metodu jsem připravil několik tabulek s 
+naměřenými daty z experimentů, které obsahují maximální chybu, chybu řešení a počet iterací potřebných 
+pro dosažení konvergence v závislosti na velikosti kroku $h$.
+
+\paragraph*{} Najprve jsem zkusil rozebrat pravou stranu $f(x) = \sin(x) - \cos(2x)$. Přesné řešení je tedy 
+$$u(x) = \frac{(x - 2x\sin{(5)} + 10\sin{(x)}- 5\cos^2{(x)} + x\cos^2{(5)} + 5)}{10}$$
+
+\paragraph*{} Pro každou velikost kroku metody jsem zaznamenal následující údaje:
+\begin{enumerate}
+    \item $||Ax - b||_{max}$ maximova norma při řešení lineární soustavy po konvergenci(nebo po dosázení nejvýššího počtu iterací).
+    \item $||u_x - u(x_i)||$ rozdíl mezi teoretickými a vypočtenými hodnotami.
+    \item Počet iterací, které byly potřebné pro dosažení konvergence. Maximálně $10^5$.
+    \item Časová náročnost, tedy doba, kterou jednotlivé metody potřebovaly k dosažení konvergence.
+\end{enumerate}
+
+
+\begin{table}[H]
+    \centering
+    \label{table:1}
+    \begin{tabular}{|l|r|r|r|r|}
+    \hline
+    \backslashbox{Values}{Step} & \multicolumn{1}{l|}{h = 0.5} & \multicolumn{1}{l|}{h = 0.1}     & \multicolumn{1}{l|}{h = 0.05}    & \multicolumn{1}{l|}{h = 0.01} \\ \hline
+    Maximum error               & 3.3 e-12                     & 2.65e-13                         & 2.00e-13                         & 1.25e-05                      \\ \hline
+    $u(x_i)-u_i$ error          & 0.743                        & 0.14                             & 0.07                             & 0.237                         \\ \hline
+    Iterations                  & \multicolumn{1}{l|}{400-500} & \multicolumn{1}{l|}{11800-11900} & \multicolumn{1}{l|}{46100-46200} & 100000                        \\ \hline
+    Time(s)                     & 0.01                         & 0.92                             & 3.68                             & 94.04                         \\ \hline
+    \end{tabular}
+
+    \caption{Jakobiho methoda pro $f(x) = \sin{(x)} - \cos{(2x)}$}
+    
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{table:2}
+    \begin{tabular}{|l|r|r|r|r|}
+    \hline
+    \backslashbox{Values}{Step}             & \multicolumn{1}{l|}{h = 0.5} & \multicolumn{1}{l|}{h = 0.1}   & \multicolumn{1}{l|}{h = 0.05}    & \multicolumn{1}{l|}{h = 0.01} \\ \hline
+    Maximum error                           & 2.60E-12                     & 2.80E-13                       & 1.42E-13                         & 1.25E-06                      \\ \hline
+    $u(x_i)-u_i$ error                      & 0.743                        & 0.140                          & 0.070                            & 0.041                         \\ \hline
+    Iterations                              & \multicolumn{1}{l|}{200-300} & \multicolumn{1}{l|}{5800-5900} & \multicolumn{1}{l|}{23000-23100} & 100000                        \\ \hline
+    Time(s)                                 & 0.09                         & 3.53                           & 15.93                            & 292.42                        \\ \hline
+    \end{tabular}
+
+    \caption{Gauss-Seidlová metoda pro $f(x) = \sin{(x)} - \cos{(2x)}$}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{table:3}
+    \begin{tabular}{|l|r|r|r|r|}
+    \hline
+    \backslashbox{Values}{Step}         & \multicolumn{1}{l|}{h = 0.5} & \multicolumn{1}{l|}{h = 0.1} & \multicolumn{1}{l|}{h = 0.05} & \multicolumn{1}{l|}{h = 0.01} \\ \hline
+    Maximum error                       & 2.22E-16                     & 4.66E-16                     & 5.25E-16                      & 6.84E-16                      \\ \hline
+    $u(x_i)-u_i$ error                  & 0.743                        & 0.140                        & 0.070                         & 0,014                         \\ \hline
+    \end{tabular}
+
+    \caption{Build-in(numpy) metoda pro $f(x) = \sin{(x)} - \cos{(2x)}$}
+\end{table}
+
+\paragraph*{} V případě iteračních metod se mi nepodařilo dosahnout dosahnout nastavené přesnosti $10^{-12}$ 
+pro velikost kroku $0.01$. Ale pro standardní solver numpy je vidět lineární závislost $u(x_i)-u_i$ chyby na 
+kroku metody $h$ viz \hyperref[table:3]{tabulka 3}. 
+
+\paragraph*{} Teď koukneme na konstantní pravou stranu $f(x) = 1$. Řešení tedy:
+$$u(x) = \frac{(27 - 5x)x}{10}$$
+
+
+\begin{table}[H]
+    \centering
+    \label{table:4}
+    \begin{tabular}{|l|r|r|r|r|}
+    \hline
+    \backslashbox{Values}{Step} & \multicolumn{1}{l|}{h = 0.5} & \multicolumn{1}{l|}{h = 0.1}     & \multicolumn{1}{l|}{h = 0.05}    & \multicolumn{1}{l|}{h = 0.01} \\ \hline
+    Maximum error               & 7.00e-12                     & 2.00e-13                         & 2.00e-13                         & 2.00e-05                      \\ \hline
+    $u(x_i)-u_i$ error          & 0.586                        & 0.124                            & 0.062                            & 0.543                         \\ \hline
+    Iterations                  & \multicolumn{1}{l|}{400-500} & \multicolumn{1}{l|}{12100-12200} & \multicolumn{1}{l|}{47700-47800} & 100000                        \\ \hline
+    Time(s)                     & 0.01                         & 0.83                             & 3.82                             & 96.26                         \\ \hline
+    \end{tabular}
+
+    \caption{Jakobiho methoda pro konstantní pravou stranu}
+    
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{table:5}
+    \begin{tabular}{|l|r|r|r|r|}
+    \hline
+    \backslashbox{Values}{Step}             & \multicolumn{1}{l|}{h = 0.5} & \multicolumn{1}{l|}{h = 0.1}   & \multicolumn{1}{l|}{h = 0.05}    & \multicolumn{1}{l|}{h = 0.01} \\ \hline
+    Maximum error                           & 7.00E-12                     & 3.00E-13                       & 2.00E-13                         & 2.89E-06                      \\ \hline
+    $u(x_i)-u_i$ error                      & 0.586                        & 0.124                          & 0.062                            & 0.086                         \\ \hline
+    Iterations                              & \multicolumn{1}{l|}{200-300} & \multicolumn{1}{l|}{6000-6100} & \multicolumn{1}{l|}{23800-23900} & 100000                        \\ \hline
+    Time(s)                                 & 0.01                         & 3.37                           & 16.65                            & 303.71                        \\ \hline
+    \end{tabular}
+
+    \caption{Gauss-Seidlová metoda pro konstantní pravou stranu}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \label{table:6}
+    \begin{tabular}{|l|r|r|r|r|}
+    \hline
+    \backslashbox{Values}{Step}        & \multicolumn{1}{l|}{h = 0.5} & \multicolumn{1}{l|}{h = 0.1} & \multicolumn{1}{l|}{h = 0.05} & \multicolumn{1}{l|}{h = 0.01} \\ \hline
+    Maximum error                      & 8,00E-16                     & 1,10E-15                     & 1,23E-15                      & 1,54E-15                      \\ \hline
+    $u(x_i)-u_i$ error                 & 0,586                        & 0,124                        & 0,062                         & 0,012                         \\ \hline
+    \end{tabular}
+
+    \caption{Build-in(numpy) metoda pro konstantní pravou stranu}
+\end{table}
+
+
+\paragraph*{} Pro konstantní pravou stranu jsem nenašel nic zajímavého...
+\end{document}
